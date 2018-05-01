@@ -42,16 +42,16 @@ physics.addBody( theGround2, "static", {
     bounce = 0.3 
     } )
 
-local landSquare = display.newImage( "./assets/sprites/landSquare.png" )
-landSquare.x = 1520
-landSquare.y = display.contentHeight - 1000
-landSquare.id = "land Square"
-physics.addBody( landSquare, "dynamic", { 
+local badCharacter = display.newImage( "./assets/sprites/enemy.png" )
+badCharacter.x = 1520
+badCharacter.y = display.contentHeight - 1000
+badCharacter.id = "bad character"
+physics.addBody( badCharacter, "dynamic", { 
     friction = 0.5, 
     bounce = 0.3 
     } )
 
-local theCharacter = display.newImage( "./assets/sprites/Idle.png" )
+local theCharacter = display.newImage( "./assets/sprites/character.png" )
 theCharacter.x = display.contentCenterX - 200
 theCharacter.y = display.contentCenterY
 theCharacter.id = "the character"
@@ -110,6 +110,15 @@ local function characterCollision( self, event )
     end
 end
 
+-- if character falls off the end of the world, respawn back to where it came from
+local function checkCharacterPosition( event )
+    -- check every frame to see if character has fallen
+    if theCharacter.y > display.contentHeight + 500 then
+        theCharacter.x = display.contentCenterX - 200
+        theCharacter.y = display.contentCenterY
+    end
+end
+
 local function checkPlayerBulletsOutOfBounds()
 	-- check if any bullets have gone off the screen
 	local bulletCounter
@@ -122,6 +131,37 @@ local function checkPlayerBulletsOutOfBounds()
                 table.remove(playerBullets, bulletCounter)
                 print("remove bullet")
             end
+        end
+    end
+end
+
+local function onCollision( event )
+ 
+    if ( event.phase == "began" ) then
+ 
+        local obj1 = event.object1
+        local obj2 = event.object2
+
+        if ( ( obj1.id == "bad character" and obj2.id == "bullet" ) or
+             ( obj1.id == "bullet" and obj2.id == "bad character" ) ) then
+            -- Remove both the laser and asteroid
+            display.remove( obj1 )
+            display.remove( obj2 )
+ 
+            for bulletCounter = #playerBullets, 1, -1 do
+                if ( playerBullets[bulletCounter] == obj1 or playerBullets[bulletCounter] == obj2 ) then
+                    table.remove( playerBullets, bulletCounter )
+                    break
+                end
+            end
+
+            -- Increase score
+            print ("you could increase a score here.")
+
+            -- make an explosion sound effect
+            local expolsionSound = audio.loadStream( "./assets/sounds/8bit_bomb_explosion.wav" )
+            local explosionChannel = audio.play( expolsionSound )
+
         end
     end
 end
@@ -208,15 +248,6 @@ function shootButton:touch( event )
     return true
 end
 
--- if character falls off the end of the world, respawn back to where it came from
-local function checkCharacterPosition( event )
-    -- check every frame to see if character has fallen
-    if theCharacter.y > display.contentHeight + 500 then
-        theCharacter.x = display.contentCenterX - 200
-        theCharacter.y = display.contentCenterY
-    end
-end
-
 
 upArrow:addEventListener( "touch", upArrow )
 downArrow:addEventListener( "touch", downArrow )
@@ -228,3 +259,4 @@ shootButton:addEventListener( "touch", shootButton )
 
 Runtime:addEventListener( "enterFrame", checkCharacterPosition )
 Runtime:addEventListener( "enterFrame", checkPlayerBulletsOutOfBounds )
+Runtime:addEventListener( "collision", onCollision )
