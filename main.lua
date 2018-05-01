@@ -149,6 +149,8 @@ local function onCollision( event )
             display.remove( obj2 )
  			
  			-- remove the bullet
+ 			local bulletCounter = nil
+ 			
             for bulletCounter = #playerBullets, 1, -1 do
                 if ( playerBullets[bulletCounter] == obj1 or playerBullets[bulletCounter] == obj2 ) then
                     playerBullets[bulletCounter]:removeSelf()
