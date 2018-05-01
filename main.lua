@@ -147,13 +147,20 @@ local function onCollision( event )
             -- Remove both the laser and asteroid
             display.remove( obj1 )
             display.remove( obj2 )
- 
+ 			
+ 			-- remove the bullet
             for bulletCounter = #playerBullets, 1, -1 do
                 if ( playerBullets[bulletCounter] == obj1 or playerBullets[bulletCounter] == obj2 ) then
+                    playerBullets[bulletCounter]:removeSelf()
+                    playerBullets[bulletCounter] = nil
                     table.remove( playerBullets, bulletCounter )
                     break
                 end
             end
+
+            --remove character
+            badCharacter:removeSelf()
+            badCharacter = nil
 
             -- Increase score
             print ("you could increase a score here.")
